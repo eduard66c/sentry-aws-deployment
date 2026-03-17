@@ -19,11 +19,11 @@ variable "instance_name" {
 variable "public_key_path" {
   description = "Path to key to be uploaded to the EC2 instance for SSH access"
   type = string
-  default = "~/.ssh/id_rsa.pub"
+  default = "~/.ssh/sentry_key.pub"
 }
 
 variable "private_key_path" {
-  description = "Path to key to be uploaded to the EC2 instance for SSH access"
+  description = "Path to the private key to be used by Ansible"
   type = string
-  default = "~/.ssh/id_rsa.pem"
+  default = "~/.ssh/sentry_key"
 }

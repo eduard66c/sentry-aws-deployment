@@ -17,6 +17,8 @@
         dest: /var/log/application.log
         force: no
         mode: '0644'
+      tags:
+        - debug_script
 
     - name: Schedule the script
       cron:

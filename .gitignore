@@ -16,7 +16,7 @@ override.tf.json
 # ANSIBLE FILES
 # ===============
 *.retry
-
+inventory.ini
 ansible.log
 # ===============
 

@@ -1,0 +1,25 @@
+- name: Upload and schedule log rotation script
+  hosts:  sentry_servers
+  become: true
+
+  tasks:
+    - name: Upload log rotation script
+      copy:
+        src: ../scripts/log_rotate.sh
+        dest: /opt/log_rotate.sh
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Validating target logfile existence
+      copy:
+        content: "Initial log entry\n"
+        dest: /var/log/application.log
+        force: no
+        mode: '0644'
+
+    - name: Schedule the script
+      cron:
+        name: "Log rotation task"
+        special_time: daily
+        job: "/bin/bash /opt/log_rotate.sh >> /var/log/rotation_cron.log 2>&1"

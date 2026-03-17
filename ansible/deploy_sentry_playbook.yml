@@ -1,0 +1,61 @@
+- name: Deploy Sentry
+  hosts:  sentry_servers
+  become: true
+  vars:
+    sentry_repo: "https://github.com/getsentry/self_hosted.git"
+    sentry_version: "24.1.0"
+
+  tasks:
+  - name: Update apt cache
+    apt:
+      update_cache: true
+      cache_valid_time: 3600
+  
+  - name: Install dependencies
+    apt:
+      name:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+        - git
+        - python3-pip
+      state: present
+    
+  - name: Install Docker
+    shell: |
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      sh get-docker.sh
+    args:
+      creates: /usr/bin/docker
+
+  - name: Ensure Docker service is running
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    
+  - name: Install Docker Compose
+    get_url:
+      url: "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86-64"
+      dest: /usr/local/bin/docker-compose
+      mode: '0755'
+
+  - name: Clone Sentry self-hosted repo
+    git:
+      repo: "{{ sentry_repo }}"
+      dest: /opt/self-hosted
+      version: "{{ sentry_version }}"
+
+  - name: Run Sentry install script
+    command: "./install.sh --skip-user-prompt"
+    args:
+      chdir: /opt/self-hosted
+    register: sentry_install_output
+    changed_when: "'Installation complete' in sentry_install_output.stdout"
+
+  - name: Start Sentry with Docker Compose
+    command: "docker-compose up -d"
+    args:
+      chdir: /opt/self-hosted

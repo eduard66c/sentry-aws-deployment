@@ -5,9 +5,9 @@ variable "aws_region" {
 }
 
 variable "instance_type" {
-  description = "Type of EC2 instance to provision; Sentry is pretty memory-intensive so at least 4GB RAM should be provided."
+  description = "Type of EC2 instance to provision; Sentry is pretty memory and CPU intensive so hardware checks require at least a t3.xlarge"
   type = string
-  default = "t3.medium"
+  default = "t3.xlarge"
 }
 
 variable "instance_name" {

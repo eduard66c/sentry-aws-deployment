@@ -40,6 +40,11 @@ resource "aws_instance" "sentry_vm" {
 
   vpc_security_group_ids = [aws_security_group.sentry_sg.id]
 
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+  }
+
   tags = {
     Name = var.instance_name
   }

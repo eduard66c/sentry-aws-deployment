@@ -2,10 +2,26 @@
   hosts:  sentry_servers
   become: true
   vars:
-    sentry_repo: "https://github.com/getsentry/self_hosted.git"
-    sentry_version: "24.1.0"
+    sentry_repo: "https://github.com/getsentry/self-hosted.git"
+    sentry_version: "26.1.0"
+
+  vars_files:
+    - vars/secrets.yml
 
   tasks:
+
+  - name: Create 4GB swap file 
+    shell: |
+      if [ ! -f /swapfile ]; then
+          fallocate -l 4G /swapfile
+          chmod 600 /swapfile
+          mkswap /swapfile
+          swapon /swapfile
+          echo '/swapfile none swap sw 0 0' >> /etc/fstab
+      fi
+    args:
+        creates: /swapfile      
+    
   - name: Update apt cache
     apt:
       update_cache: true
@@ -38,7 +54,7 @@
     
   - name: Install Docker Compose
     get_url:
-      url: "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86-64"
+      url: "https://github.com/docker/compose/releases/download/v5.0.1/docker-compose-linux-x86_64"
       dest: /usr/local/bin/docker-compose
       mode: '0755'
 
@@ -49,13 +65,33 @@
       version: "{{ sentry_version }}"
 
   - name: Run Sentry install script
-    command: "./install.sh --skip-user-prompt"
+    shell: "./install.sh --skip-user-creation --no-report-self-hosted-issues"
     args:
       chdir: /opt/self-hosted
+      creates: /opt/self-hosted/docker-compose.yaml
+    environment:
+      CI: "1"
+    async: 900
+    poll: 30
     register: sentry_install_output
-    changed_when: "'Installation complete' in sentry_install_output.stdout"
 
   - name: Start Sentry with Docker Compose
-    command: "docker-compose up -d"
+    command: "docker compose up -d"
+    args:
+      chdir: /opt/self-hosted
+    when: sentry_install_output.rc == 0
+
+  - name: Wait for Sentry Web UI to be ready
+    wait_for:
+        port: 9000
+        delay: 30
+        timeout: 600
+
+  - name: Create Sentry Admin User
+    shell: |
+      sudo docker compose run --rm web createuser \
+      --email {{ sentry_admin_email }} \
+      --password {{ sentry_admin_password }} \
+      --superuser
     args:
       chdir: /opt/self-hosted

@@ -19,6 +19,7 @@ override.tf.json
 *.retry
 inventory.ini
 ansible.log
+ansible/vars/
 # ===============
 
 # SCRIPT FILES

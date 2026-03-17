@@ -26,9 +26,25 @@ terraform apply
 ***Note:** This will automatically generate an inventory.ini inside the ansible/ directory.*
 
 **Configuration:**
+
+1. Go to the `ansible` directory, and create an Ansible vault for storing the admin email and password for the Sentry Web UI. 
 ```Bash
 cd ../ansible
-ansible-playbook -i inventory.ini deploy_sentry_playbook.yml
+ansible-vault create vars/secrets.yml
+```
+
+2. You will be prompted for a vault password. *Make sure to remember it as it can't be reset.*
+
+3. `nano` will open, you must provide the following parameters in YAML format:
+```yaml
+sentry_admin_email: "your_email@domain.com"
+sentry_admin_password: "SuperSecretPW123!"
+```
+
+4. Save the values and close `nano`. Finally, run the playbook and be ready to provide the password for the vault:
+
+```Bash
+ansible-playbook -i inventory.ini deploy_sentry_playbook.yml --ask-vault-pass
 ```
 
 ## Assignment 2: Log Rotation Automation

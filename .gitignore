@@ -1,0 +1,38 @@
+# TERRAFORM FILES
+# ===============
+.terraform/
+*.tfstate
+*.tfstate.*
+
+*.tfvars
+*.tfvars.json
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# ===============
+
+# ANSIBLE FILES
+# ===============
+*.retry
+
+ansible.log
+# ===============
+
+# SCRIPT FILES
+# ===============
+scripts/*.log
+scripts/*.gz
+/var/log/application.log
+# ===============
+
+# SECURITY & OS
+# ===============
+*.pem
+*.key
+id_rsa
+
+.DS_Store
+Thumbs.db
+# ===============
